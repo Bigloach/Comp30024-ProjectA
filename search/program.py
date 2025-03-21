@@ -3,7 +3,7 @@
 
 from .core import CellState, Coord, Direction, MoveAction
 from .utils import render_board
-
+from .search import calculate_h
 
 def search(
     board: dict[Coord, CellState]
@@ -33,6 +33,7 @@ def search(
     # ...
     # ... (your solution goes here!)
     # ...
+    print(calculate_h(board))
 
     # Here we're returning "hardcoded" actions as an example of the expected
     # output format. Of course, you should instead return the result of your
