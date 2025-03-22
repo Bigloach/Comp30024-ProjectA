@@ -1,28 +1,67 @@
 import heapq
 from .core import CellState, Coord, Direction, MoveAction, BOARD_N
 
-# def valid_jump(red, pos):
-#     for dir in Direction:
-#         if red + dir == pos:
-#             return True
-for dir in Direction:
-    if board[red + dir] == CellState.LILY_PAD:
-        valid_pos = board[red + dir] 
-    if board[red + dir] == CellState.BLUE:
-        if board[red + dir + dir] == CellState.LILY_PAD:
-            valid_pos = board[red + dir + dir]
+def a_star_search(board:dict[Coord, CellState]):
+    goals = get_goals(board) 
+    red =  [cord for cord, state in board.items() if state == CellState.RED][0]
+    h = calculate_h(board)
+    f = {red: 0}
+    visited = set()
+    min_path = []
+    queue = []
+    
+    heapq.heappush(queue, (0, red))
+    
+    while queue:
+        curr_cost, curr_pos = heapq.heappop(queue)
+        
+        if curr_pos in goals:
+            return 
 
-def calculate_h(board:dict[Coord, CellState]):
+        if curr_pos in visited:
+            continue
+        
+        visited.add(curr_pos)
+
+        valid_moves = get_valid_moves
+        for move in valid_moves:
+            next_pos, dir = move.coord, move._dirrections
+
+            if next_pos in visited:
+                continue
+
+            pass
+        
+     
+
+def get_valid_moves(board, red) -> list[MoveAction] | None:
+    valid_moves = []
+
+    for dir in Direction:
+        move = red + dir
+        if move in board and board[move] == CellState.LILY_PAD:
+            valid_moves.append(MoveAction(move, dir))
+        
+        if move in board and board[move] == CellState.BLUE:
+            cross_move = move + dir
+            if cross_move in board and board[cross_move] == CellState.LILY_PAD:
+                valid_moves.append(MoveAction(cross_move, dir))
+    
+    return valid_moves
+
+def calculate_h(board:dict[Coord, CellState]) -> dict[Coord, int]:
     man_distance = {}
     lily_pads = get_lily_pads(board)
     goals = get_goals(board)
+
     for pad in lily_pads:
-        distances = []
-        if (pad.r != BOARD_N - 1):
+        if pad.r != BOARD_N - 1:
+            distances = []
             for goal in goals:
                 distances.append(abs(pad.c - goal.c) + abs(pad.r - goal.r))
-        if distances:
+
             man_distance[pad] = min(distances)
+
     return man_distance 
 
 def get_lily_pads(board:dict[Coord, CellState]):
