@@ -5,7 +5,7 @@ def a_star_search(board:dict[Coord, CellState]):
     goals = get_goals(board) 
     red =  [cord for cord, state in board.items() if state == CellState.RED][0]
     h = calculate_h(board)
-    f = {red: 0}
+    distance = {red: 0}
     visited = set()
     min_path = []
     queue = []
@@ -25,18 +25,18 @@ def a_star_search(board:dict[Coord, CellState]):
 
         valid_moves = get_valid_moves
         for move in valid_moves:
-            next_pos, dir = move.coord, move._dirrections
-
-            if next_pos in visited:
-                continue
-
-            pass
+            next_pos, dir = move.coord, move._directions 
+            f = curr_cost + h[next_pos] + 1
+            if type(dir) == list:
+                
+                
+            heapq.heappush(queue, (f, next_pos))
         
-     
+        
 
-def get_valid_moves(board, red) -> list[MoveAction] | None:
+def get_valid_moves(board, red):
     valid_moves = []
-
+    is_cross = True
     for dir in Direction:
         move = red + dir
         if move in board and board[move] == CellState.LILY_PAD:
@@ -45,7 +45,9 @@ def get_valid_moves(board, red) -> list[MoveAction] | None:
         if move in board and board[move] == CellState.BLUE:
             cross_move = move + dir
             if cross_move in board and board[cross_move] == CellState.LILY_PAD:
-                valid_moves.append(MoveAction(cross_move, dir))
+                dir_list = []
+                dir_list.append(dir)
+                valid_moves.append((MoveAction(cross_move, dir_list)))
     
     return valid_moves
 
