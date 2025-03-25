@@ -3,7 +3,7 @@
 
 from .core import CellState, Coord, Direction, MoveAction
 from .utils import render_board
-from .search import calculate_h
+from .search import a_star_search
 
 def search(
     board: dict[Coord, CellState]
@@ -22,6 +22,14 @@ def search(
     Returns:
         A list of "move actions" as MoveAction instances, or `None` if no
         solution is possible.
+        [
+        MoveAction(Coord(0, 5), [Direction.Down]),
+        MoveAction(Coord(1, 5), [Direction.DownLeft]),
+        MoveAction(Coord(3, 3), [Direction.Left]),
+        MoveAction(Coord(3, 2), [Direction.Down, Direction.Right]),
+        MoveAction(Coord(5, 4), [Direction.Down]),
+        MoveAction(Coord(6, 4), [Direction.Down]),
+    ]
     """
 
     # The render_board() function is handy for debugging. It will print out a
@@ -33,17 +41,10 @@ def search(
     # ...
     # ... (your solution goes here!)
     # ...
-    print(calculate_h(board))
+    result = a_star_search(board) 
 
     # Here we're returning "hardcoded" actions as an example of the expected
     # output format. Of course, you should instead return the result of your
     # search algorithm. Remember: if no solution is possible for a given input,
     # return `None` instead of a list.
-    return [
-        MoveAction(Coord(0, 5), [Direction.Down]),
-        MoveAction(Coord(1, 5), [Direction.DownLeft]),
-        MoveAction(Coord(3, 3), [Direction.Left]),
-        MoveAction(Coord(3, 2), [Direction.Down, Direction.Right]),
-        MoveAction(Coord(5, 4), [Direction.Down]),
-        MoveAction(Coord(6, 4), [Direction.Down]),
-    ]
+    return result 
