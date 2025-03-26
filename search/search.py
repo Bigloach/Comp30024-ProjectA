@@ -9,10 +9,12 @@ DIRECTION = [
     Direction.Right,
 ]
 
+COST = 1
+
 def a_star_search(board:dict[Coord, CellState]):
     goals = get_goals(board) 
     red =  [cord for cord, state in board.items() if state == CellState.RED][0]
-    h = calculate_h(board)
+    herustic = calculate_herustic(board)
     distance = {red: 0}
     path = {red: None}
     queue = []
@@ -24,20 +26,20 @@ def a_star_search(board:dict[Coord, CellState]):
         
         if curr_pos in goals:
             result = []
-            current = curr_pos
+            while path[curr_pos]: 
+                result.append(path[curr_pos])
+                curr_pos = path[curr_pos].coord
 
-            while path[current]: 
-                result.append(path[current])
-                current = path[current].coord
             return result[::-1] 
 
         for move in get_valid_moves(board, curr_pos):
             next_pos, dir = move.coord, move._directions 
-            next_cost = curr_cost + 1
+            next_cost = curr_cost + COST
+
             if next_pos not in distance or distance[next_pos] > next_cost:
                 distance[next_pos] = next_cost
                 path[next_pos] = MoveAction(curr_pos, dir)
-                f = next_cost + h[next_pos] 
+                f = next_cost + herustic[next_pos] 
                 heapq.heappush(queue, (f, next_cost, next_pos))
 
     return None  
@@ -51,13 +53,13 @@ def get_valid_moves(board, red):
         if move in board and board[move] == CellState.LILY_PAD:
             valid_moves.append(MoveAction(move, dir))
         
-    for dest, paths in get_cross_jumps(red, [], board, {}).items():
+    for dest, paths in get_cross_jumps(red, [], [], board, {}).items():
         for path in paths:
             valid_moves.append(MoveAction(dest, path))
 
     return valid_moves
         
-def get_cross_jumps(curr_pos, visited, board, result):
+def get_cross_jumps(curr_pos, visited, path, board, result):
     for dir in DIRECTION:
         if (curr_pos + dir) in board and board[curr_pos + dir] == CellState.BLUE:
             dest = curr_pos + dir + dir 
@@ -66,18 +68,20 @@ def get_cross_jumps(curr_pos, visited, board, result):
                 dest not in visited):
 
                 visited.append(dest)
+                path.append(dir)
                 
                 if dest not in result:
                     result[dest] = []
-                result[dest].append(visited[:])
+                result[dest].append(path[:])
 
-                get_cross_jumps(dest, visited, board, result)
+                get_cross_jumps(dest, visited, path, board, result)
                 visited.pop()
+                path.pop()
 
     return result 
                 
-def calculate_h(board:dict[Coord, CellState]) -> dict[Coord, int]:
-    man_distance = {}
+def calculate_herustic(board:dict[Coord, CellState]) -> dict[Coord, int]:
+    manhattan_distance = {}
     lily_pads = get_lily_pads(board)
     goals = get_goals(board)
 
@@ -86,9 +90,9 @@ def calculate_h(board:dict[Coord, CellState]) -> dict[Coord, int]:
         for goal in goals:
             distances.append(abs(pad.c - goal.c) + abs(pad.r - goal.r))
 
-        man_distance[pad] = min(distances)
+        manhattan_distance[pad] = min(distances)
 
-    return man_distance 
+    return manhattan_distance 
 
 def get_lily_pads(board:dict[Coord, CellState]):
     return [cord for cord, state in board.items() if state == CellState.LILY_PAD] 
