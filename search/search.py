@@ -1,3 +1,6 @@
+# COMP30024 Artificial Intelligence, Semester 1 2025
+# Project Part A: Single Player Freckers
+
 import heapq
 from .core import CellState, Coord, Direction, MoveAction, BOARD_N
 
@@ -12,6 +15,15 @@ DIRECTION = [
 COST = 1
 
 def a_star_search(board:dict[Coord, CellState]) -> list[MoveAction] | None:
+    """
+    Using A* search to find the shortest path to the goal state 
+    in the board, storing the parent node the directions of each 
+    node in a path dict
+    
+    If a goal state is reached, reverse the path dict to 
+    return the final path as a list of MoveActions
+    """
+
     goals = get_goals(board) 
     red =  [cord for cord, state in board.items() if state == CellState.RED][0]
     herustic = calculate_herustic(board)
@@ -46,12 +58,16 @@ def a_star_search(board:dict[Coord, CellState]) -> list[MoveAction] | None:
         
 
 def get_valid_moves(board, goals, red) -> list[MoveAction]:
+    """
+    Retrive all possible positions that the current red frog
+    can move to, including one step jump and seris of cross jumps
+    """
     valid_moves = []
 
     for dir in DIRECTION:
-        move = red + dir
-        if move in board and board[move] == CellState.LILY_PAD:
-            valid_moves.append(MoveAction(move, dir))
+        if (0 <= (red.r + dir.r) < BOARD_N) and (0 <= (red .c + dir.c) < BOARD_N) \
+            and (red + dir) in board and board[red + dir] == CellState.LILY_PAD:
+            valid_moves.append(MoveAction(red + dir, dir))
         
     for dest, paths in get_cross_jumps(red, [], [], board, goals, {}).items():
         for path in paths:
@@ -62,30 +78,43 @@ def get_valid_moves(board, goals, red) -> list[MoveAction]:
 def get_cross_jumps(
         curr_pos, visited, path, board, goals, result
         ) -> dict[Coord, list[Direction]]:
+    """
+    Using dfs and backtracking to get all the possible cross jump paths 
+    from the current position
+
+    Backtrack to explore every possible path after visiting
+    the neighbours of current position
+    """
     for dir in DIRECTION:
-        if (curr_pos + dir) in board and board[curr_pos + dir] == CellState.BLUE:
-            dest = curr_pos + dir + dir 
-            if (dest in board and 
-                board[dest] == CellState.LILY_PAD and
-                dest not in visited):
-
-                visited.append(dest)
-                path.append(dir)
+        if  (0 <= (curr_pos.r + dir.r) < BOARD_N) and (0 <= (curr_pos.c + dir.c) < BOARD_N) \
+              and (curr_pos + dir) in board and board[curr_pos + dir] == CellState.BLUE:
+            move = curr_pos + dir 
+            if (0 <= (move.r + dir.r) < BOARD_N) and (0 <= (move.c + dir.c) < BOARD_N) and \
+                (move + dir) in board and board[move + dir] == CellState.LILY_PAD:
                 
-                if dest not in result:
-                    result[dest] = []
-                result[dest].append(path[:])
+                dest = move + dir
 
-                if dest in goals:
-                    return result
+                if dest not in visited:
+                    visited.append(dest)
+                    path.append(dir)
+                    
+                    if dest not in result:
+                        result[dest] = []
+                    result[dest].append(path[:])
 
-                get_cross_jumps(dest, visited, path, board, goals, result)
-                visited.pop()
-                path.pop()
+
+                    get_cross_jumps(dest, visited, path, board, goals, result)
+                    visited.pop()
+                    path.pop()
 
     return result 
                 
 def calculate_herustic(board:dict[Coord, CellState]) -> dict[Coord, int]:
+    """
+    Calculate the herustic, which is 
+    the minmum manhattan distance of every Lily Pads to the 
+    target Lily Pads among the last row of the board
+    """
     manhattan_distance = {}
     lily_pads = get_lily_pads(board)
     goals = get_goals(board)

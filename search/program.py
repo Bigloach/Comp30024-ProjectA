@@ -22,14 +22,6 @@ def search(
     Returns:
         A list of "move actions" as MoveAction instances, or `None` if no
         solution is possible.
-        [
-        MoveAction(Coord(0, 5), [Direction.Down]),
-        MoveAction(Coord(1, 5), [Direction.DownLeft]),
-        MoveAction(Coord(3, 3), [Direction.Left]),
-        MoveAction(Coord(3, 2), [Direction.Down, Direction.Right]),
-        MoveAction(Coord(5, 4), [Direction.Down]),
-        MoveAction(Coord(6, 4), [Direction.Down]),
-    ]
     """
 
     # The render_board() function is handy for debugging. It will print out a
